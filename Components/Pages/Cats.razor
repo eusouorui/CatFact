@@ -1,0 +1,33 @@
+@page "/cats"
+
+<h1>Cats</h1>
+
+
+<div class="catDiv">
+    @if(catImagePath != null)
+    {
+        <img src="@catImagePath" alt="Image">
+        <p>Paragraph goes here</p>
+    }
+        <button @onclick="ChangeImage">Show a Cat Fact</button>
+</div>
+
+
+@code {
+    private const string relativePath = "Images/cats/";
+    
+    private string? catImagePath;
+    
+    private void ChangeImage()
+    {
+        var totalFiles = 11;
+
+        var rnd = new Random();
+
+        var randomCatImageNumber = rnd.Next(1, totalFiles + 1);
+
+        var fileExtension = ".png";
+
+        catImagePath = $"{relativePath}{randomCatImageNumber}{fileExtension}";
+    }
+}
