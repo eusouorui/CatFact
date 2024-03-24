@@ -4,21 +4,55 @@
 
 
 <div class="catDiv">
-    @if(catImagePath != null)
-    {
         <img src="@catImagePath" alt="Image">
-        <p>Paragraph goes here</p>
-    }
-        <button @onclick="ChangeImage">Show a Cat Fact</button>
+        <p>@catFact</p>
+    <button @onclick="LoadPageInfo">Show a Cat Fact</button>
 </div>
 
 
 @code {
-    private const string relativePath = "Images/cats/";
-    
-    private string? catImagePath;
-    
-    private void ChangeImage()
+    private string? catImagePath = "Images/cats/1.png";
+    private string? catFact = string.Empty;
+
+    private async void LoadPageInfo()
+    {
+        const string relativePath = "Images/cats/";
+        const string apiUrl = "https://catfact.ninja/fact";
+
+        catFact = await GetCatFact(apiUrl);
+        catImagePath = GetCatPhotoPath(relativePath);
+    }
+
+    private async Task<string> GetCatFact(string apiUrl)
+    {
+        using HttpClient client = new();
+        try
+        {
+            HttpResponseMessage response = await client.GetAsync(apiUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseData = await response.Content.ReadAsStringAsync();
+
+                // Write Pretty message
+                var jObject = JObject.Parse(responseData);
+
+                var fact = jObject["fact"]?.ToString();
+                var length = jObject["length"]?.ToString();
+                return fact ?? $"Failed to get data from the API. Status code: {response.StatusCode}";
+            }
+            else
+            {
+                return $"Failed to get data from the API. Status code: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            return $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private string GetCatPhotoPath(string relativePath)
     {
         var totalFiles = 11;
 
@@ -28,6 +62,6 @@
 
         var fileExtension = ".png";
 
-        catImagePath = $"{relativePath}{randomCatImageNumber}{fileExtension}";
+        return $"{relativePath}{randomCatImageNumber}{fileExtension}";
     }
 }
