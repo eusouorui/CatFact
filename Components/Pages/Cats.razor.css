@@ -1,0 +1,27 @@
+.catDiv {
+    width: 100%;
+    height: 500px;
+    text-align: center;
+}
+
+.catDiv img {
+    display: block;
+    max-width: 500px;
+    max-height: 500px;
+    width: 50%;
+    margin-inline: auto;
+}
+
+.catDiv p {
+    display: block;
+    text-align: center;
+}
+
+.catDiv div {
+    width: 100%;
+    height: 50px;
+}
+
+.catDiv button {
+    bottom: 5%;
+}

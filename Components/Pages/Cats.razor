@@ -1,0 +1,67 @@
+@page "/cats"
+
+<h1>Cats</h1>
+
+
+<div class="catDiv">
+        <img src="@catImagePath" alt="Image">
+        <p>@catFact</p>
+    <button @onclick="LoadPageInfo">Show a Cat Fact</button>
+</div>
+
+
+@code {
+    private string? catImagePath = "Images/cats/1.png";
+    private string? catFact = string.Empty;
+
+    private async void LoadPageInfo()
+    {
+        const string relativePath = "Images/cats/";
+        const string apiUrl = "https://catfact.ninja/fact";
+
+        catFact = await GetCatFact(apiUrl);
+        catImagePath = GetCatPhotoPath(relativePath);
+    }
+
+    private async Task<string> GetCatFact(string apiUrl)
+    {
+        using HttpClient client = new();
+        try
+        {
+            HttpResponseMessage response = await client.GetAsync(apiUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseData = await response.Content.ReadAsStringAsync();
+
+                // Write Pretty message
+                var jObject = JObject.Parse(responseData);
+
+                var fact = jObject["fact"]?.ToString();
+                var length = jObject["length"]?.ToString();
+                return fact ?? $"Failed to get data from the API. Status code: {response.StatusCode}";
+            }
+            else
+            {
+                return $"Failed to get data from the API. Status code: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            return $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private string GetCatPhotoPath(string relativePath)
+    {
+        var totalFiles = 11;
+
+        var rnd = new Random();
+
+        var randomCatImageNumber = rnd.Next(1, totalFiles + 1);
+
+        var fileExtension = ".png";
+
+        return $"{relativePath}{randomCatImageNumber}{fileExtension}";
+    }
+}
