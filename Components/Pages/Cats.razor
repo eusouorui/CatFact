@@ -4,21 +4,28 @@
 
 
 <div class="catDiv">
-        <img src="@catImagePath" alt="Image">
+    @if (hasInfo)
+    {
+        <img src="@catImagePath" alt="">
         <p>@catFact</p>
-    <button @onclick="LoadPageInfo">Show a Cat Fact</button>
+        <button @onclick="ChangeInfo">Show a Cat Fact</button>
+    }
+    else
+    {
+        <p>Loading...</p>
+    }
 </div>
 
 
 @code {
-    private string? catImagePath = "Images/cats/1.png";
-    private string? catFact = string.Empty;
+    private string? catImagePath;
+    private string? catFact;
+    private const string relativePath = "Images/cats/";
+    private const string apiUrl = "https://catfact.ninja/fact";
+    private bool hasInfo = false;
 
-    private async void LoadPageInfo()
+    private async Task ChangeInfo()
     {
-        const string relativePath = "Images/cats/";
-        const string apiUrl = "https://catfact.ninja/fact";
-
         catFact = await GetCatFact(apiUrl);
         catImagePath = GetCatPhotoPath(relativePath);
     }
@@ -34,11 +41,10 @@
             {
                 string responseData = await response.Content.ReadAsStringAsync();
 
-                // Write Pretty message
                 var jObject = JObject.Parse(responseData);
 
                 var fact = jObject["fact"]?.ToString();
-                var length = jObject["length"]?.ToString();
+                
                 return fact ?? $"Failed to get data from the API. Status code: {response.StatusCode}";
             }
             else
@@ -63,5 +69,11 @@
         var fileExtension = ".png";
 
         return $"{relativePath}{randomCatImageNumber}{fileExtension}";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ChangeInfo();
+        hasInfo = true;
     }
 }
