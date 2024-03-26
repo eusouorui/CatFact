@@ -1,14 +1,14 @@
-@page "/cats"
+@page "/catFacts"
 
-<h1>Cats</h1>
+<h1>Cat Facts</h1>
 
 
 <div class="catDiv">
-    @if (hasInfo)
+    @if (_hasInfo)
     {
-        <img src="@catImagePath" alt="">
-        <p>@catFact</p>
-        <button @onclick="ChangeInfo">Show a Cat Fact</button>
+        <img src="@_catImagePath" alt="">
+        <p>@_catFact</p>
+        <button @onclick="ChangeInfo" disabled="@_disabled">Show a Cat Fact</button>
     }
     else
     {
@@ -18,16 +18,20 @@
 
 
 @code {
-    private string? catImagePath;
-    private string? catFact;
-    private const string relativePath = "Images/cats/";
-    private const string apiUrl = "https://catfact.ninja/fact";
-    private bool hasInfo = false;
+    private string? _catImagePath;
+    private int _catImageNumber;
+    private string? _catFact;
+    private const string _relativePath = "Images/cats/";
+    private const string _apiUrl = "https://catfact.ninja/fact";
+    private bool _hasInfo = false;
+    private bool _disabled;
 
     private async Task ChangeInfo()
     {
-        catFact = await GetCatFact(apiUrl);
-        catImagePath = GetCatPhotoPath(relativePath);
+        _disabled = true;
+        _catFact = await GetCatFact(_apiUrl);
+        _catImagePath = GetCatPhotoPath(_relativePath);
+        _disabled = false;
     }
 
     private async Task<string> GetCatFact(string apiUrl)
@@ -44,7 +48,7 @@
                 var jObject = JObject.Parse(responseData);
 
                 var fact = jObject["fact"]?.ToString();
-                
+
                 return fact ?? $"Failed to get data from the API. Status code: {response.StatusCode}";
             }
             else
@@ -61,19 +65,39 @@
     private string GetCatPhotoPath(string relativePath)
     {
         var totalFiles = 11;
-
         var rnd = new Random();
 
-        var randomCatImageNumber = rnd.Next(1, totalFiles + 1);
+        var random = 0;
+        var counter = 10;
+
+        do
+        {
+            random = rnd.Next(1, totalFiles + 1);
+
+            counter--;
+            if (counter == 0) break;
+
+        } while (random == _catImageNumber);
+
+        _catImageNumber = random;
+
+        if (random == _catImageNumber)
+        {
+            _catImageNumber = _catImageNumber == totalFiles ? 1 : _catImageNumber++;
+        }
+        else
+        {
+            _catImageNumber = random;
+        }
 
         var fileExtension = ".png";
 
-        return $"{relativePath}{randomCatImageNumber}{fileExtension}";
+        return $"{relativePath}{_catImageNumber}{fileExtension}";
     }
 
     protected override async Task OnInitializedAsync()
     {
         await ChangeInfo();
-        hasInfo = true;
+        _hasInfo = true;
     }
 }
