@@ -1,0 +1,119 @@
+﻿@page "/catBreeds"
+
+<h3>Breeds</h3>
+
+@if (_catBreeds == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Breed</th>
+                <th>Country</th>
+                <th>Origin</th>
+                <th>Coat</th>
+                <th>Pattern</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var breed in _catBreeds)
+            {
+                <tr>
+                    <td>@breed._breed</td>
+                    <td>@breed._country</td>
+                    <td>@breed._origin</td>
+                    <td>@breed._coat</td>
+                    <td>@breed._pattern</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private string[] _apiUrls = {
+        "https://catfact.ninja/breeds?page=1", "https://catfact.ninja/breeds?page=2", "https://catfact.ninja/breeds?page=3", "https://catfact.ninja/breeds?page=4"
+    };
+
+    private Breed[]? _catBreeds = new Breed[]{};
+
+    private async Task LoadBreeds()
+    {
+        foreach(var _apiUrl in _apiUrls)
+        {
+            var helper = await GetAllBreeds(_apiUrl);
+            _catBreeds = _catBreeds.Concat(helper).ToArray();
+        }
+    }
+
+    private async Task<Breed[]> GetAllBreeds(string apiUrl)
+    {
+        using HttpClient client = new();
+        try
+        {
+            HttpResponseMessage response = await client.GetAsync(apiUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseData = await response.Content.ReadAsStringAsync();
+
+                var jObject = JObject.Parse(responseData);
+
+                var data = jObject["data"];
+
+                var _breeds = Enumerable.Range(0, data.Count()).Select(index => new Breed
+                    {
+                        _breed = data[index]?["breed"]?.ToString(),
+                        _country = data[index]?["country"]?.ToString(),
+                        _origin = data[index]?["origin"]?.ToString(),
+                        _coat = data[index]?["coat"]?.ToString(),
+                        _pattern = data[index]?["pattern"]?.ToString()
+                    }).ToArray();
+
+                return _breeds;
+                //?? $"Failed to get data from the API. Status code: {response.StatusCode}";
+            }
+            else
+            {
+                return Enumerable.Range(1, 5).Select(index => new Breed
+                    {
+                        _breed = "1",
+                        _country = "2",
+                        _origin ="3",
+                        _coat = "4",
+                        _pattern = "5"
+                    }).ToArray();
+                //$"Failed to get data from the API. Status code: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            return Enumerable.Range(1, 5).Select(index => new Breed
+                {
+                    _breed = "5",
+                    _country = "4",
+                    _origin = "3",
+                    _coat = "2",
+                    _pattern = "1"
+                }).ToArray();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBreeds();
+    }
+
+    private class Breed
+    {
+        public string? _breed { get; set; }
+        public string? _country { get; set; }
+        public string? _origin { get; set; }
+        public string? _coat { get; set; }
+        public string? _pattern { get; set; }
+    }
+}
