@@ -33,21 +33,29 @@ else
     </table>
 }
 
+<div class="pagination">
+    <button @onclick="LoadBreedsMinus">&laquo;</button>
+    <button @onclick="LoadBreeds1">1</button>
+    <button @onclick="LoadBreeds2">2</button>
+    <button @onclick="LoadBreeds3">3</button>
+    <button @onclick="LoadBreeds4">4</button>
+    <button @onclick="LoadBreeds">&raquo;</button>
+</div>
+
 @code {
 
     private string[] _apiUrls = {
         "https://catfact.ninja/breeds?page=1", "https://catfact.ninja/breeds?page=2", "https://catfact.ninja/breeds?page=3", "https://catfact.ninja/breeds?page=4"
     };
-
-    private Breed[]? _catBreeds = new Breed[]{};
+    private int i = -1;
+    private Breed[]? _catBreeds;
 
     private async Task LoadBreeds()
     {
-        foreach(var _apiUrl in _apiUrls)
-        {
-            var helper = await GetAllBreeds(_apiUrl);
-            _catBreeds = _catBreeds.Concat(helper).ToArray();
-        }
+        if (i == 3)
+            i=-1;
+        _catBreeds = null;
+        _catBreeds = await GetAllBreeds(_apiUrls[++i]);
     }
 
     private async Task<Breed[]> GetAllBreeds(string apiUrl)
@@ -106,6 +114,38 @@ else
     protected override async Task OnInitializedAsync()
     {
         await LoadBreeds();
+    }
+
+    private async Task LoadBreedsMinus()
+    {
+        if (i == 0)
+            i = 4;
+        _catBreeds = null;
+        _catBreeds = await GetAllBreeds(_apiUrls[--i]);
+    }
+    private async Task LoadBreeds1()
+    {
+        _catBreeds = null;
+        i = 0;
+        _catBreeds = await GetAllBreeds(_apiUrls[i]);
+    }
+    private async Task LoadBreeds2()
+    {
+        _catBreeds = null;
+        i = 1;
+        _catBreeds = await GetAllBreeds(_apiUrls[i]);
+    }
+    private async Task LoadBreeds3()
+    {
+        _catBreeds = null;
+        i = 2;
+        _catBreeds = await GetAllBreeds(_apiUrls[i]);
+    }
+    private async Task LoadBreeds4()
+    {
+        _catBreeds = null;
+        i = 3;
+        _catBreeds = await GetAllBreeds(_apiUrls[i]);
     }
 
     private class Breed
