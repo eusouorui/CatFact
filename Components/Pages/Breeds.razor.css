@@ -16,5 +16,5 @@
 }
 
 .pagination button:hover:not(.active) {
-    background-color: #ddd;
+    background-color: #6a4ae0;
 }
