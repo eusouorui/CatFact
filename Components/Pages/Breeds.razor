@@ -34,12 +34,12 @@ else
 }
 
 <div class="pagination">
-    <button @onclick="@(e => LoadBreeds(--i))">&laquo;</button>
-    <button @onclick="@(e => LoadBreeds(0))">1</button>
-    <button @onclick="@(e => LoadBreeds(1))">2</button>
-    <button @onclick="@(e => LoadBreeds(2))">3</button>
-    <button @onclick="@(e => LoadBreeds(3))">4</button>
-    <button @onclick="@(e => LoadBreeds(++i))">&raquo;</button>
+    <button id="minus" @onclick="@(e => LoadBreeds(--i))">&laquo;</button>
+    <button id="btn1" class="@(string.IsNullOrEmpty("")? "active" : "")" @onclick="@(e => LoadBreeds(0))">1</button>
+    <button id="btn2" @onclick="@(e => LoadBreeds(1))">2</button>
+    <button id="btn3" @onclick="@(e => LoadBreeds(2))">3</button>
+    <button id="btn4" @onclick="@(e => LoadBreeds(3))">4</button>
+    <button id="plus" @onclick="@(e => LoadBreeds(++i))">&raquo;</button>
 </div>
 
 @code {
@@ -52,18 +52,28 @@ else
 
     private async Task LoadBreeds(int index)
     {
-        i = index;
-        if (index == 4){
-            index = 0;
-            i = 0;
-        }
-        if (index == -1){
-            index = 3;
-            i = 3;
-        }
-        
+        i = DiscoverNewIndex(index);
+
         _catBreeds = null;
-        _catBreeds = await GetAllBreeds(_apiUrls[index]);
+        _catBreeds = await GetAllBreeds(_apiUrls[i]);
+    }
+
+    private int DiscoverNewIndex(int index)
+    {
+        // my god I just nutted
+        return index == 4 ? 0 : index == -1 ? 3 : index;
+        /*if (index == 4)
+            return 0;
+
+        if (index == -1)
+            return 3;
+
+        return index;*/
+    }
+
+    private void ButtonSelected()
+    {
+        
     }
 
     private async Task<Breed[]> GetAllBreeds(string apiUrl)
